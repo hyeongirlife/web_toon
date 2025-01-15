@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
+import 'services/api_service.dart';
 
 void main() {
+  ApiService.getTodaysToons();
   runApp(const MyApp());
 }
 
@@ -34,7 +36,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       // home: const MyHomePage(title: 'Flutter Demo Home Page'),
-      home: const HomeScreen(),
+      home: HomeScreen(),
     );
   }
 }
