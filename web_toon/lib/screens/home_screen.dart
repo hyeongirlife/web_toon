@@ -2,15 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:web_toon/models/web_toon.dart';
 import 'package:web_toon/services/api_service.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:web_toon/widgets/webtoon_widget.dart';
 
-class HomeScreen extends StatelessWidget {
-  HomeScreen({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
-  Future<List<WebtoonModel>> webtoons = ApiService.getTodaysToons();
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  late Future<List<WebtoonModel>> webtoons;
+
+  @override
+  void initState() {
+    super.initState();
+    webtoons = ApiService.getTodaysToons();
+  }
 
   @override
   Widget build(BuildContext context) {
-    print(webtoons);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -61,41 +72,10 @@ ListView makeList(AsyncSnapshot<List<WebtoonModel>> webtoons) {
     itemCount: webtoons.data!.length,
     itemBuilder: (context, index) {
       var webtoon = webtoons.data![index];
-      return Column(
-        children: [
-          Container(
-            width: 250,
-            clipBehavior: Clip.hardEdge,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
-              boxShadow: [
-                BoxShadow(
-                  blurRadius: 15,
-                  offset: const Offset(10, 10),
-                  color: Colors.black.withOpacity(0.5),
-                ),
-              ],
-            ),
-            child: Image.network(
-              webtoon.thumb,
-              headers: const {
-                "Referer": "https://comic.naver.com",
-                "User-Agent": "Mozilla/5.0",
-              },
-            ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            webtoon.title,
-            style: GoogleFonts.gaegu(
-              fontSize: 22,
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.5,
-              height: 1.2,
-              color: Colors.black87,
-            ),
-          )
-        ],
+      return WebtoonDetail(
+        title: webtoon.title,
+        thumb: webtoon.thumb,
+        id: webtoon.id,
       );
     },
     separatorBuilder: (context, index) => const SizedBox(width: 10),
