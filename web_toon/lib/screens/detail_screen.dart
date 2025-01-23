@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_toon/models/webtoon_detail_model.dart';
 import 'package:web_toon/models/webtoon_episode_model.dart';
 import 'package:web_toon/services/api_service.dart';
@@ -24,12 +25,42 @@ class DetailScreen extends StatefulWidget {
 class _DetailScreenState extends State<DetailScreen> {
   Future<WebtoonDetailModel>? webtoonDetail;
   Future<List<WebtoonEpisodeModel>>? episodes;
+  bool isLiked = false; // 좋아요 상태 관리
+  SharedPreferences? prefs;
 
   @override
   void initState() {
     super.initState();
     // 데이터 로딩 시작
     loadData();
+    initPrefs();
+  }
+
+  Future<void> initPrefs() async {
+    prefs = await SharedPreferences.getInstance();
+    final likedToons = prefs!.getStringList('likedToons') ?? [];
+    setState(() {
+      isLiked = likedToons.contains(widget.id);
+    });
+  }
+
+  Future<void> toggleLike() async {
+    // prefs가 초기화되지 않았다면 early return
+    if (prefs == null) return;
+
+    final likedToons = prefs!.getStringList('likedToons') ?? [];
+
+    if (isLiked) {
+      likedToons.remove(widget.id);
+    } else {
+      likedToons.add(widget.id);
+    }
+
+    await prefs!.setStringList('likedToons', likedToons);
+
+    setState(() {
+      isLiked = !isLiked;
+    });
   }
 
   void loadData() {
@@ -59,6 +90,17 @@ class _DetailScreenState extends State<DetailScreen> {
         elevation: 2,
         backgroundColor: Colors.white,
         foregroundColor: Colors.green,
+        actions: [
+          IconButton(
+            onPressed: () async {
+              await toggleLike();
+            },
+            icon: Icon(
+              isLiked ? Icons.favorite : Icons.favorite_border,
+              color: isLiked ? Colors.red : Colors.green,
+            ),
+          ),
+        ],
         title: Text(
           widget.title,
           style: GoogleFonts.fredoka(
